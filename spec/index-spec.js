@@ -45,4 +45,34 @@ describe("At time", () => {
       done();
     }, 400);
   });
+
+  it("should pass an argument as option", (done) => {
+    var fn = {
+      call: (event) => {
+        expect(event).toEqual({"test": true, "path": "/tmp/test"});
+        done();
+      }
+    };
+    var time = require('../src')(fn.call);
+
+    time.record('/tmp/test', {timeout: 200, arg: {"test": true, "path": "/tmp/test"}});
+  });
+
+  it("should keep the this argument with bind", (done) => {
+    var Stub = function() {
+      this.opt = true;
+    };
+    Stub.prototype.test = function(arg) {
+      expect(this.opt).toBe(true);
+      expect(arg).toEqual({"test":true, "path": "/tmp/test"});
+      done();
+    };
+
+    var stub = new Stub();
+
+    var time = require('../src')(stub.test.bind(stub));
+
+    time.record('/tmp/test', {timeout: 200, arg: {"test": true, "path": "/tmp/test"}});
+
+  });
 });
